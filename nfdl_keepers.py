@@ -1,8 +1,11 @@
 import json
 import urllib2
 import re
+import sys
 
 pattern = re.compile('[\W_]+')
+year = 2015
+league_id = 19322
 
 def normalize_name(s):
   return pattern.sub('', s.lower())
@@ -32,12 +35,12 @@ def dlf_rankings():
     return name_to_ranking
 
 def nfdl_rosters():
-  url = 'http://football18.myfantasyleague.com/2014/export?TYPE=rosters&L=67651&W=&JSON=1'
+  url = 'http://football18.myfantasyleague.com/{}/export?TYPE=rosters&L={}&W=&JSON=1'.format(year, league_id)
   resp = urllib2.urlopen(url)
   return json.loads(resp.read())['rosters']['franchise']
 
 def nfdl_franchises():
-  url = 'http://football18.myfantasyleague.com/2014/export?TYPE=league&L=67651&W=&JSON=1'
+  url = 'http://football18.myfantasyleague.com/{}/export?TYPE=league&L={}&W=&JSON=1'.format(year, league_id)
   resp = urllib2.urlopen(url)
   franchises = json.loads(resp.read())['league']['franchises']['franchise']
   id_to_franchise = {}
@@ -46,7 +49,7 @@ def nfdl_franchises():
   return id_to_franchise
 
 def mfl_players():
-  url = 'http://football18.myfantasyleague.com/2014/export?TYPE=players&L=67651&W=&JSON=1'
+  url = 'http://football18.myfantasyleague.com/{}/export?TYPE=players&L={}&W=&JSON=1'.format(year, league_id)
   resp = urllib2.urlopen(url)
   players = json.loads(resp.read())['players']['player']
   id_to_player = {}
@@ -54,7 +57,7 @@ def mfl_players():
     id_to_player[player['id']] = player
   return id_to_player
 
-def print_keepers():
+def print_keepers(cutoff=170):
   rankings = dlf_rankings()
   rosters = nfdl_rosters()
   all_players = mfl_players()
@@ -69,7 +72,7 @@ def print_keepers():
       player_name = player_info['name']
       try:
         ranking = rankings[normalize_name(player_name)]
-        if ranking['rank'] < 170:
+        if ranking['rank'] < cutoff:
           keepers.append((player_info, ranking))
       except:
         pass
@@ -78,8 +81,8 @@ def print_keepers():
       print(k)
     print('Number of keepers: {}'.format(len(keepers)))
 
-def main():
-  print_keepers()
-
 if __name__ == '__main__':
-  main()
+  try:
+    print_keepers(int(sys.argv[1]))
+  except:
+    print_keepers()
