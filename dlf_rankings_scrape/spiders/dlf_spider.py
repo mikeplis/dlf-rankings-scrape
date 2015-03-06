@@ -4,7 +4,7 @@ from dlf_rankings_scrape.items import DlfRanking
 class DlfSpider(scrapy.Spider):
   name = "dlf"
   allowed_domains = ["http://dynastyleaguefootball.com/"]
-  start_urls = ["http://dynastyleaguefootball.com/adpdata/2015-adp/?month=1"]
+  start_urls = ["http://dynastyleaguefootball.com/adpdata/2015-adp/?month=2"]
 
   def parse(self, response):
     overall_table_rows = response.xpath(
